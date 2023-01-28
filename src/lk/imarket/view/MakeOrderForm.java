@@ -28,7 +28,9 @@ public class MakeOrderForm extends javax.swing.JFrame {
     private CustomerService customerService;
     private ProductRepositoryImpl productRepositoryImpl;
     private int oAvailableQty = 0;
+    private double totalAmount = 0.0;
     private Map<String, Integer> productQtyMap = new HashMap<>();
+    private PaymentForm paymentForm;
 
     /**
      * Creates new form MakeOrderForm
@@ -72,6 +74,10 @@ public class MakeOrderForm extends javax.swing.JFrame {
     private void setProductQty(String productCode, Integer selectedQty) {
 
     }
+    
+    public void setButtonCheckoutEnable(boolean isEnable) {
+         btnCheckout.setEnabled(isEnable);
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -106,6 +112,7 @@ public class MakeOrderForm extends javax.swing.JFrame {
         jLabel9 = new javax.swing.JLabel();
         btnRemove = new javax.swing.JButton();
         btnClearCart = new javax.swing.JButton();
+        lblTotalAmount = new javax.swing.JLabel();
         btnCancel = new javax.swing.JButton();
         btnCheckout = new javax.swing.JButton();
         lblOrderNumber = new javax.swing.JLabel();
@@ -270,22 +277,29 @@ public class MakeOrderForm extends javax.swing.JFrame {
             }
         });
 
+        lblTotalAmount.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        lblTotalAmount.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        lblTotalAmount.setText("0.0");
+
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 902, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblTotalAmount, javax.swing.GroupLayout.PREFERRED_SIZE, 123, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel3Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 902, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGap(18, 18, 18)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(btnRemove, javax.swing.GroupLayout.DEFAULT_SIZE, 124, Short.MAX_VALUE)
                     .addComponent(btnClearCart, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(254, 254, 254))
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -300,13 +314,25 @@ public class MakeOrderForm extends javax.swing.JFrame {
                         .addGap(8, 8, 8)
                         .addComponent(btnClearCart)))
                 .addGap(18, 18, 18)
-                .addComponent(jLabel9)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jLabel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(lblTotalAmount, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap(39, Short.MAX_VALUE))
         );
 
         btnCancel.setText("CANCEL");
+        btnCancel.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCancelActionPerformed(evt);
+            }
+        });
 
         btnCheckout.setText("CHECKOUT");
+        btnCheckout.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCheckoutActionPerformed(evt);
+            }
+        });
 
         lblOrderNumber.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
 
@@ -407,6 +433,10 @@ public class MakeOrderForm extends javax.swing.JFrame {
 
             productQtyMap.put(productCode,
                     Integer.valueOf(remainingQty));
+            
+            totalAmount += total;
+            
+            lblTotalAmount.setText(String.valueOf(totalAmount));
         } else {
             JOptionPane.showMessageDialog(this,
                     "Entered qty is exceeding available qty",
@@ -420,6 +450,8 @@ public class MakeOrderForm extends javax.swing.JFrame {
         tableModel.setRowCount(0);
         lblAvailableQty.setText(String.valueOf(oAvailableQty));
         productQtyMap.clear();
+        totalAmount = 0.0;
+        lblTotalAmount.setText(String.valueOf(totalAmount));
     }//GEN-LAST:event_btnClearCartActionPerformed
 
     private void txtQtyKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtQtyKeyReleased
@@ -431,12 +463,15 @@ public class MakeOrderForm extends javax.swing.JFrame {
 
     private void btnRemoveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRemoveActionPerformed
         DefaultTableModel tableModel = (DefaultTableModel) tblCart.getModel();
+        
         if (tblCart.getSelectedRow() != -1) {
 
             String productCode = tableModel.getValueAt(tblCart.getSelectedRow(),
                     0).toString();
             int qty = Integer.parseInt(tableModel.getValueAt(tblCart.getSelectedRow(),
                     3).toString());
+            double cartTotal = Double.parseDouble(tableModel.getValueAt(tblCart.getSelectedRow(),
+                    4).toString());
             int availableQty = Integer.parseInt(lblAvailableQty.getText());
 
             productQtyMap.put(productCode,
@@ -447,7 +482,9 @@ public class MakeOrderForm extends javax.swing.JFrame {
                 lblAvailableQty.setText(String
                     .valueOf(productQtyMap.get(productCode)));
             }
-            
+       
+            totalAmount = totalAmount - cartTotal;
+            lblTotalAmount.setText(String.valueOf(totalAmount));
             tableModel.removeRow(tblCart.getSelectedRow());
         } else {
             JOptionPane
@@ -455,6 +492,19 @@ public class MakeOrderForm extends javax.swing.JFrame {
                             "Please select a row to delete");
         }
     }//GEN-LAST:event_btnRemoveActionPerformed
+
+    private void btnCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelActionPerformed
+        this.dispose();
+    }//GEN-LAST:event_btnCancelActionPerformed
+
+    private void btnCheckoutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCheckoutActionPerformed
+//        this.dispose();
+        paymentForm = new PaymentForm(txtName.getText(), this);
+        paymentForm.setVisible(true);
+        if (paymentForm.isShowing()) {
+            btnCheckout.setEnabled(false);
+        }
+    }//GEN-LAST:event_btnCheckoutActionPerformed
 
     /**
      * @param args the command line arguments
@@ -514,6 +564,7 @@ public class MakeOrderForm extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lblAvailableQty;
     private javax.swing.JLabel lblOrderNumber;
+    private javax.swing.JLabel lblTotalAmount;
     private javax.swing.JTable tblCart;
     private javax.swing.JTextField txtName;
     private javax.swing.JTextField txtProductName;
